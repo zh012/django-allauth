@@ -31,7 +31,30 @@ class DefaultSocialAccountAdapter(object):
         e.g. the flow from within a signal handler is bad -- multiple
         handlers may be active and are executed in undetermined order.
         """
-        pass
+
+        if not app_settings.AUTO_CONNECT:
+            return
+
+        # auto connect the account
+        # https://github.com/pennersr/django-allauth/issues/418
+
+        # social account already exists, so this is just a login
+        if sociallogin.is_existing:
+            return
+
+        # some social logins don't have an email address
+        if not sociallogin.email_addresses:
+            return
+
+        # check if given email address already exists as a verified email on
+        # an existing user's account
+        try:
+            existing_email = EmailAddress.objects.get(email__iexact=sociallogin.email_addresses[0].email, verified=True)
+        except EmailAddress.DoesNotExist:
+            return
+
+        # if it does, connect this new social login to the existing user
+        sociallogin.connect(request, existing_email.user)
 
     def authentication_error(self,
                              request,

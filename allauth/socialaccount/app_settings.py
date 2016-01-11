@@ -71,6 +71,10 @@ class AppSettings(object):
     def UID_MAX_LENGTH(self):
         return 191
 
+    @property
+    def AUTO_CONNECT(self):
+        return self._setting('AUTO_CONNECT', False)
+
 
 # Ugly? Guido recommends this himself ...
 # http://mail.python.org/pipermail/python-ideas/2012-May/014969.html
